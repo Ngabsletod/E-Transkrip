@@ -1,0 +1,5 @@
+{
+  "name": "Sistem Transkrip Akademik Teknik Sipil",
+  "description": "Dashboard manajemen transkrip nilai mahasiswa Teknik Sipil dengan perhitungan IPK otomatis, validasi prasyarat akademik (KKN, KP, TA), dan fitur cetak transkrip resmi.",
+  "requestFramePermissions": []
+}

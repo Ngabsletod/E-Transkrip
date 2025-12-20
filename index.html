@@ -1,0 +1,471 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIAKAD Teknik Sipil - Dashboard Akademik</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #0f172a; }
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        
+        .card-shadow { box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); }
+        .input-field { background-color: #ffffff; border: 1.5px solid #e2e8f0; color: #0f172a; transition: all 0.2s; font-size: 0.875rem; font-weight: 600; }
+        .input-field:focus { border-color: #2563eb; outline: none; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+        
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white !important; padding: 0 !important; }
+            .print-container { width: 100% !important; margin: 0 !important; border: none !important; box-shadow: none !important; }
+            @page { size: A4; margin: 1cm; }
+        }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.3",
+    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
+    "react/": "https://esm.sh/react@^19.2.3/"
+  }
+}
+</script>
+</head>
+<body class="overflow-x-hidden">
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-[#0f172a] text-white z-50 transition-transform duration-300 lg:translate-x-0 -translate-x-full no-print">
+        <div class="p-5 border-b border-slate-800 flex items-center gap-3">
+            <div class="bg-blue-600 p-2 rounded-xl">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+            </div>
+            <div>
+                <h1 class="font-bold text-sm tracking-tight uppercase">E-TRANSCRIPT</h1>
+                <p class="text-[10px] text-blue-400 font-extrabold uppercase tracking-widest leading-none">Teknik Sipil</p>
+            </div>
+        </div>
+
+        <nav class="mt-4 px-3 space-y-1">
+            <button onclick="setView('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-xs transition-all text-slate-400 hover:bg-slate-800">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                Dashboard
+            </button>
+            <button onclick="setView('print')" id="nav-print" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-xs transition-all text-slate-400 hover:bg-slate-800">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                Cetak Transkrip
+            </button>
+            
+            <div class="pt-6 pb-2 px-4"><p class="text-[9px] font-black text-slate-600 uppercase tracking-widest">Semester</p></div>
+            <div id="sem-nav" class="space-y-1"></div>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="lg:ml-64 min-h-screen flex flex-col transition-all duration-300">
+        <!-- Top Header -->
+        <header class="bg-white border-b border-slate-200 sticky top-0 z-40 p-3 px-6 flex items-center justify-between no-print">
+            <button onclick="toggleSidebar()" class="lg:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            </button>
+            <div class="flex items-center gap-2">
+                <span id="view-title" class="font-black text-slate-800 uppercase text-[11px] tracking-widest bg-slate-100 px-3 py-1 rounded-full">Dashboard</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="hidden sm:flex flex-col items-end">
+                    <span id="header-name" class="text-xs font-black text-slate-900 uppercase">-</span>
+                    <span id="header-npm" class="text-[9px] text-slate-500 font-bold uppercase tracking-tighter">-</span>
+                </div>
+                <div class="w-9 h-9 bg-blue-600 text-white rounded-xl flex items-center justify-center font-black text-xs shadow-lg shadow-blue-200">TS</div>
+            </div>
+        </header>
+
+        <main class="p-4 md:p-6 flex-1 bg-slate-50">
+            <div id="app-view" class="max-w-6xl mx-auto space-y-5">
+                <!-- Content will be injected here -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="notif" class="fixed bottom-6 right-6 z-[100] translate-y-20 opacity-0 transition-all duration-300">
+        <div class="bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 border border-slate-700">
+            <div class="bg-blue-500 p-1 rounded-full"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="text-white"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <p id="notif-msg" class="text-[10px] font-black uppercase tracking-widest">Tersimpan</p>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. DATA MASTER ---
+        const COURSES = [
+            // Semester 1
+            { id: "TKS25101", code: "TKS25101", name: "Matematika I", semester: 1, sks: 4 },
+            { id: "TKS25102", code: "TKS25102", name: "Fisika Dasar – Mekanika", semester: 1, sks: 2 },
+            { id: "TKS25103", code: "TKS25103", name: "Algoritma dan Pemrograman", semester: 1, sks: 2 },
+            { id: "TKS25104", code: "TKS25104", name: "Geologi dan Geotektonik", semester: 1, sks: 2 },
+            { id: "TKS25105", code: "TKS25105", name: "Gambar Struktur Bangunan", semester: 1, sks: 3 },
+            { id: "TKS25106", code: "TKS25106", name: "Analisis Struktur I", semester: 1, sks: 3 },
+            { id: "TKS25107", code: "TKS25107", name: "Geomatika", semester: 1, sks: 1 },
+            { id: "TKS25108", code: "TKS25108", name: "Praktikum Geomatika", semester: 1, sks: 1 },
+            { id: "UNO2010", code: "UNO2010", name: "Jati Diri Unwiku", semester: 1, sks: 2 },
+
+            // Semester 2
+            { id: "TKS25201", code: "TKS25201", name: "Matematika II", semester: 2, sks: 3 },
+            { id: "TKS25202", code: "TKS25202", name: "Kimia", semester: 2, sks: 3 },
+            { id: "TKS25203", code: "TKS25203", name: "Fisika Dasar – Listrik dan Termal", semester: 2, sks: 2 },
+            { id: "TKS25204", code: "TKS25204", name: "Analisis Struktur II", semester: 2, sks: 3 },
+            { id: "TKS25205", code: "TKS25205", name: "Rekayasa Lingkungan", semester: 2, sks: 2 },
+            { id: "TKS25206", code: "TKS25206", name: "Mekanika Fluida", semester: 2, sks: 2 },
+            { id: "TKS25207", code: "TKS25207", name: "Rekayasa Lalu Lintas", semester: 2, sks: 2 },
+            { id: "TKS25208", code: "TKS25208", name: "Mekanika Tanah", semester: 2, sks: 3 },
+
+            // Semester 3
+            { id: "TKS25301", code: "TKS25301", name: "Matematika III", semester: 3, sks: 3 },
+            { id: "TKS25302", code: "TKS25302", name: "Biologi Lingkungan & Ekologi", semester: 3, sks: 2 },
+            { id: "TKS25303", code: "TKS25303", name: "Mekanika Bahan", semester: 3, sks: 3 },
+            { id: "TKS25304", code: "TKS25304", name: "Bahan Bangunan dan Dasar-Dasar Teknologi Beton", semester: 3, sks: 3 },
+            { id: "TKS25305", code: "TKS25305", name: "Geometri Jalan Raya", semester: 3, sks: 2 },
+            { id: "TKS25306", code: "TKS25306", name: "Rekayasa Pondasi", semester: 3, sks: 4 },
+            { id: "TKS25307", code: "TKS25307", name: "Praktikum Mekanika Tanah", semester: 3, sks: 1 },
+            { id: "TKS25308", code: "TKS25308", name: "Struktur Kayu dan Bambu", semester: 3, sks: 2 },
+            { id: "TKS25309", code: "TKS25309", name: "Hidraulika", semester: 3, sks: 1 },
+            { id: "TKS25310", code: "TKS25310", name: "Praktikum Hidraulika", semester: 3, sks: 1 },
+
+            // Semester 4
+            { id: "TKS25401", code: "TKS25401", name: "Metode Numerik", semester: 4, sks: 3 },
+            { id: "TKS25402", code: "TKS25402", name: "Statistik dan Probabilitas", semester: 4, sks: 2 },
+            { id: "TKS25403", code: "TKS25403", name: "Analisis Struktur III", semester: 4, sks: 2 },
+            { id: "TKS25404", code: "TKS25404", name: "Struktur Baja I", semester: 4, sks: 2 },
+            { id: "TKS25405", code: "TKS25405", name: "Struktur Beton Bertulang I", semester: 4, sks: 3 },
+            { id: "TKS25406", code: "TKS25406", name: "Bahan Perkerasan", semester: 4, sks: 2 },
+            { id: "TKS25407", code: "TKS25407", name: "Manajemen Konstruksi", semester: 4, sks: 3 },
+            { id: "TKS25408", code: "TKS25408", name: "Hidrologi Terapan", semester: 4, sks: 1 },
+            { id: "TKS25409", code: "TKS25409", name: "Praktikum Teknologi Bahan & Beton", semester: 4, sks: 1 },
+            { id: "TKS25410", code: "TKS25410", name: "Praktikum Hidrologi", semester: 4, sks: 1 },
+            { id: "TKS25411", code: "TKS25411", name: "Bahasa Inggris Teknik", semester: 4, sks: 2 },
+
+            // Semester 5
+            { id: "TKS25501", code: "TKS25501", name: "Matematika IV", semester: 5, sks: 2 },
+            { id: "TKS25502", code: "TKS25502", name: "Struktur Baja II", semester: 5, sks: 3 },
+            { id: "TKS25503", code: "TKS25503", name: "Struktur Beton Bertulang II", semester: 5, sks: 3 },
+            { id: "TKS25504", code: "TKS25504", name: "Rekayasa Irigasi", semester: 5, sks: 3 },
+            { id: "TKS25505", code: "TKS25505", name: "Drainase", semester: 5, sks: 2 },
+            { id: "TKS25506", code: "TKS25506", name: "Metode Pelaksanaan Konstruksi", semester: 5, sks: 2 },
+            { id: "TKS25507", code: "TKS25507", name: "K3 Konstruksi & Manajemen Risiko", semester: 5, sks: 2 },
+            { id: "TKS25508", code: "TKS25508", name: "Praktikum Bahan Perkerasan", semester: 5, sks: 1 },
+            { id: "UNO3011", code: "UNO3011", name: "Kewirausahaan", semester: 5, sks: 3 },
+
+            // Semester 6
+            { id: "TKS25601", code: "TKS25601", name: "Aplikasi Komputer Teknik Sipil", semester: 6, sks: 2 },
+            { id: "TKS25602", code: "TKS25602", name: "Perancangan Bangunan Sipil I (Capstone)", semester: 6, sks: 2 },
+            { id: "UNO2001", code: "UNO2001", name: "Pendidikan Pancasila", semester: 6, sks: 2 },
+            { id: "TKSP2501", code: "TKSP2501", name: "Analisis Dinamika Struktur & Teknik Gempa", semester: 6, sks: 2 },
+            { id: "TKSP2502", code: "TKSP2502", name: "Beton Pracetak & Prategang", semester: 6, sks: 2 },
+            { id: "TKSP2503", code: "TKSP2503", name: "Metode Elemen Hingga", semester: 6, sks: 2 },
+            { id: "TKSP2505", code: "TKSP2505", name: "Perencanaan & Permodelan Transportasi", semester: 6, sks: 2 },
+            { id: "TKSP2507", code: "TKSP2507", name: "Jalan Rel", semester: 6, sks: 2 },
+
+            // Semester 7
+            { id: "TKS25701", code: "TKS25701", name: "Metode Penelitian", semester: 7, sks: 2 },
+            { id: "TKS25702", code: "TKS25702", name: "Etika Profesi & Tanggung Jawab Insinyur", semester: 7, sks: 2 },
+            { id: "TKS25703", code: "TKS25703", name: "Perancangan Bangunan Sipil II (Capstone)", semester: 7, sks: 2 },
+            { id: "UNO2002", code: "UNO2002", name: "Pendidikan Kewarganegaraan", semester: 7, sks: 2 },
+            { id: "UNO2003", code: "UNO2003", name: "Bahasa Indonesia", semester: 7, sks: 2 },
+            { id: "UNO2004", code: "UNO2004", name: "Pendidikan Agama", semester: 7, sks: 2 },
+            { id: "TKSP2504", code: "TKSP2504", name: "Struktur Jembatan", semester: 7, sks: 2 },
+
+            // Semester 8
+            { id: "TA801", code: "TA801", name: "Kerja Praktik / KP", semester: 8, sks: 3 },
+            { id: "TA802", code: "TA802", name: "KKN (Kuliah Kerja Nyata)", semester: 8, sks: 3 },
+            { id: "TA803", code: "TA803", name: "Tugas Akhir", semester: 8, sks: 6 },
+            { id: "TS801", code: "TS801", name: "Seminar Teknik Sipil", semester: 8, sks: 2 },
+            { id: "TS802", code: "TS802", name: "Industri 4.0 dalam Konstruksi", semester: 8, sks: 1 }
+        ];
+
+        // --- 2. STATE ---
+        let state = {
+            view: 'dashboard',
+            activeSem: null,
+            profile: JSON.parse(localStorage.getItem('civil_v4_profile')) || { name: '', npm: '', batch: '', advisor: '' },
+            grades: JSON.parse(localStorage.getItem('civil_v4_grades')) || {},
+            selectedPrintSems: [1,2,3,4,5,6,7,8]
+        };
+
+        // --- 3. UTILS ---
+        function getGrade(score) {
+            const s = parseFloat(score) || 0;
+            if (s >= 85) return { letter: 'A', weight: 4.00 };
+            if (s >= 80) return { letter: 'A-', weight: 3.75 };
+            if (s >= 75) return { letter: 'B+', weight: 3.50 };
+            if (s >= 65) return { letter: 'B', weight: 3.00 };
+            if (s >= 60) return { letter: 'B-', weight: 2.75 };
+            if (s >= 55) return { letter: 'C+', weight: 2.50 };
+            if (s >= 40) return { letter: 'C', weight: 2.00 };
+            if (s >= 20) return { letter: 'D', weight: 1.00 };
+            return { letter: 'E', weight: 0.00 };
+        }
+
+        function calculateStats(list) {
+            let totalSks = 0;
+            let totalWeightSks = 0;
+            list.forEach(c => {
+                const g = state.grades[c.id];
+                if (g && g.score > 0) {
+                    totalSks += c.sks;
+                    totalWeightSks += (g.weight * c.sks);
+                }
+            });
+            const ipk = totalSks > 0 ? totalWeightSks / totalSks : 0;
+            let pred = 'Belum Terhitung';
+            if (ipk >= 3.51) pred = 'Dengan Pujian';
+            else if (ipk >= 2.76) pred = 'Sangat Memuaskan';
+            else if (ipk >= 2.00) pred = 'Memuaskan';
+            return { totalSks, ipk, pred };
+        }
+
+        // --- 4. ACTIONS ---
+        function setView(view, sem = null) {
+            state.view = view;
+            state.activeSem = sem;
+            render();
+            if (window.innerWidth < 1024) toggleSidebar();
+            window.scrollTo(0,0);
+        }
+
+        function updateProfile(field, val) {
+            state.profile[field] = val;
+            localStorage.setItem('civil_v4_profile', JSON.stringify(state.profile));
+            document.getElementById('header-name').innerText = state.profile.name || '-';
+            document.getElementById('header-npm').innerText = state.profile.npm || '-';
+        }
+
+        function updateGrade(id, score) {
+            const info = getGrade(score);
+            state.grades[id] = { score: parseFloat(score) || 0, ...info };
+            localStorage.setItem('civil_v4_grades', JSON.stringify(state.grades));
+            render();
+        }
+
+        function togglePrintSem(s) {
+            if (state.selectedPrintSems.includes(s)) state.selectedPrintSems = state.selectedPrintSems.filter(i => i !== s);
+            else state.selectedPrintSems.push(s);
+            state.selectedPrintSems.sort();
+            render();
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('-translate-x-full');
+        }
+
+        // --- 5. RENDER ENGINE ---
+        function render() {
+            const app = document.getElementById('app-view');
+            const title = document.getElementById('view-title');
+            const stats = calculateStats(COURSES);
+
+            // Nav active state
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('bg-blue-600', 'text-white', 'shadow-lg'));
+            const activeId = state.view === 'dashboard' ? 'nav-dashboard' : (state.view === 'print' ? 'nav-print' : `nav-sem-${state.activeSem}`);
+            const activeBtn = document.getElementById(activeId);
+            if (activeBtn) activeBtn.classList.add('bg-blue-600', 'text-white', 'shadow-lg');
+
+            if (state.view === 'print') {
+                title.innerText = "PRATINJAU CETAK";
+                app.innerHTML = renderPrintPage(stats);
+            } else {
+                title.innerText = state.activeSem ? `SEMESTER ${state.activeSem}` : "DASHBOARD";
+                app.innerHTML = `
+                    <!-- Profile Card -->
+                    <div class="bg-white p-5 rounded-3xl border border-slate-200 card-shadow">
+                        <h2 class="text-[10px] font-black text-slate-800 uppercase tracking-widest mb-4 flex items-center gap-2">
+                           <div class="w-1.5 h-4 bg-blue-600 rounded-full"></div> Informasi Mahasiswa
+                        </h2>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            ${renderInput('Nama Mahasiswa', 'name', state.profile.name)}
+                            ${renderInput('NPM / NIM', 'npm', state.profile.npm)}
+                            ${renderInput('Angkatan', 'batch', state.profile.batch)}
+                            ${renderInput('Dosen Wali', 'advisor', state.profile.advisor)}
+                        </div>
+                    </div>
+
+                    <!-- Stats Row -->
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                        ${renderStat('IPK Komulatif', stats.ipk.toFixed(2), stats.pred, 'blue')}
+                        ${renderStat('Total SKS', stats.totalSks, 'SKS Masuk', 'indigo')}
+                        ${renderStat('Progress', Math.round((stats.totalSks/144)*100) + '%', 'Kelulusan', 'emerald')}
+                        ${renderStat('Status Matkul', Object.keys(state.grades).length, 'Mata Kuliah', 'amber')}
+                    </div>
+
+                    <!-- Table -->
+                    <div class="bg-white rounded-3xl border border-slate-200 card-shadow overflow-hidden">
+                        <div class="p-4 border-b flex justify-between items-center bg-slate-50/50">
+                            <h3 class="font-black text-slate-700 text-[10px] uppercase tracking-widest">${state.activeSem ? 'Daftar Nilai Semester ' + state.activeSem : 'Seluruh Nilai Akademik'}</h3>
+                        </div>
+                        <div class="overflow-x-auto custom-scrollbar">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-slate-50/80 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b">
+                                    <tr>
+                                        <th class="px-6 py-4">Mata Kuliah</th>
+                                        <th class="px-6 py-4 text-center">SKS</th>
+                                        <th class="px-6 py-4 text-center w-32">Nilai</th>
+                                        <th class="px-6 py-4 text-center">Indeks</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100">
+                                    ${(state.activeSem ? COURSES.filter(c => c.semester === state.activeSem) : COURSES).map(c => renderTableRow(c, stats.totalSks)).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            }
+            updateProfileUI();
+        }
+
+        function renderInput(label, key, val) {
+            return `
+                <div class="space-y-1">
+                    <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest px-1">${label}</label>
+                    <input oninput="updateProfile('${key}', this.value)" value="${val}" class="input-field w-full p-3 rounded-2xl" placeholder="...">
+                </div>
+            `;
+        }
+
+        function renderStat(label, val, sub, color) {
+            const themes = { blue: 'text-blue-600', emerald: 'text-emerald-600', indigo: 'text-indigo-600', amber: 'text-amber-600' };
+            return `
+                <div class="bg-white p-5 rounded-3xl border border-slate-200 card-shadow transition-all group">
+                    <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">${label}</p>
+                    <h4 class="text-3xl font-black text-slate-900">${val}</h4>
+                    <p class="text-[9px] font-bold ${themes[color]} uppercase tracking-tighter mt-1">${sub}</p>
+                </div>
+            `;
+        }
+
+        function renderTableRow(c, totalSks) {
+            const g = state.grades[c.id] || { score: '', letter: '-' };
+            let lock = false;
+            let msg = '';
+            
+            // Logika Prasyarat berdasarkan SKS Kumulatif
+            if (c.id === 'TA802' && totalSks <= 80) { lock = true; msg = '80 SKS'; } // KKN
+            if (c.id === 'TA801' && totalSks <= 110) { lock = true; msg = '110 SKS'; } // Kerja Praktik
+            if (c.id === 'TA803' && totalSks <= 120) { lock = true; msg = '120 SKS'; } // Tugas Akhir
+
+            return `
+                <tr class="transition-colors ${lock ? 'opacity-40' : 'hover:bg-slate-50/50'}">
+                    <td class="px-6 py-4">
+                        <div class="font-bold text-slate-900 uppercase text-xs">${c.name}</div>
+                        <div class="font-mono text-[9px] font-bold text-slate-400 mt-0.5">${c.code}</div>
+                    </td>
+                    <td class="px-6 py-4 text-center font-black text-slate-700">${c.sks}</td>
+                    <td class="px-6 py-4">
+                        ${lock ? `<div class="bg-slate-100 text-[9px] p-2 rounded-xl text-slate-400 font-black text-center border border-slate-200 uppercase tracking-tighter">Min ${msg}</div>` : 
+                        `<input type="number" oninput="updateGrade('${c.id}', this.value)" value="${g.score}" class="input-field w-full p-2 rounded-xl text-center text-blue-700" placeholder="0-100">`}
+                    </td>
+                    <td class="px-6 py-4 text-center font-black text-slate-900 text-base">${lock ? '-' : g.letter}</td>
+                </tr>
+            `;
+        }
+
+        function renderPrintPage(stats) {
+            const filtered = COURSES.filter(c => state.selectedPrintSems.includes(c.semester));
+            const pStats = calculateStats(filtered);
+
+            return `
+                <div class="space-y-6">
+                    <div class="no-print bg-white p-6 rounded-3xl border border-slate-200 card-shadow space-y-5">
+                        <div class="flex flex-col md:flex-row justify-between gap-4">
+                            <div>
+                                <h3 class="font-black text-slate-900 text-sm uppercase">Seleksi Cetak</h3>
+                                <p class="text-[10px] text-slate-500 font-bold uppercase">Pilih semester untuk disertakan dalam dokumen PDF.</p>
+                            </div>
+                            <button onclick="window.print()" class="bg-[#0f172a] text-white px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                                Unduh PDF
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-4 md:grid-cols-8 gap-2">
+                            ${[1,2,3,4,5,6,7,8].map(s => `
+                                <button onclick="togglePrintSem(${s})" class="p-3 rounded-2xl font-black text-xs transition-all border-2 ${state.selectedPrintSems.includes(s) ? 'bg-blue-600 border-blue-600 text-white shadow-lg' : 'bg-white border-slate-100 text-slate-400'}">S${s}</button>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <!-- PDF Container -->
+                    <div class="print-container bg-white p-12 mx-auto card-shadow border border-slate-100" style="width: 210mm; min-height: 297mm;">
+                        <div class="flex justify-between items-center border-b-4 border-slate-900 pb-6 mb-8 text-slate-900 uppercase">
+                            <div>
+                                <h1 class="text-3xl font-black tracking-tighter">Transkrip Akademik</h1>
+                                <p class="font-bold text-xs opacity-60">Fakultas Teknik • Teknik Sipil</p>
+                            </div>
+                            <div class="text-right text-[10px] font-black">
+                                <p>Universitas WIjaya Kusuma</p>
+                                <p class="opacity-50">SIAKAD Official Transcript v4.0</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4 text-[11px] mb-8 font-black uppercase text-slate-900">
+                            <p><span class="opacity-40 w-24 inline-block">Nama</span> : ${state.profile.name || '-'}</p>
+                            <p><span class="opacity-40 w-24 inline-block">NPM</span> : ${state.profile.npm || '-'}</p>
+                            <p><span class="opacity-40 w-24 inline-block">Angkatan</span> : ${state.profile.batch || '-'}</p>
+                            <p><span class="opacity-40 w-24 inline-block">Dosen Wali</span> : ${state.profile.advisor || '-'}</p>
+                        </div>
+
+                        <table class="w-full text-[10px] border-collapse border-2 border-slate-900 text-slate-900 mb-10">
+                            <thead>
+                                <tr class="bg-slate-900 text-white font-black uppercase tracking-widest">
+                                    <th class="p-2 border border-slate-900 w-8">No</th>
+                                    <th class="p-2 border border-slate-900 text-left">Nama Mata Kuliah</th>
+                                    <th class="p-2 border border-slate-900 w-12 text-center">SKS</th>
+                                    <th class="p-2 border border-slate-900 w-12 text-center">Nilai</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${filtered.map((c, i) => {
+                                    const g = state.grades[c.id] || { letter: '-' };
+                                    return `<tr><td class="p-2 border border-slate-300 text-center">${i+1}</td><td class="p-2 border border-slate-300 font-bold uppercase">${c.name}</td><td class="p-2 border border-slate-300 text-center font-black">${c.sks}</td><td class="p-2 border border-slate-300 text-center font-black">${g.letter}</td></tr>`;
+                                }).join('')}
+                            </tbody>
+                        </table>
+
+                        <div class="grid grid-cols-2 gap-10 text-slate-900">
+                            <div class="bg-slate-100 p-6 rounded-xl border-2 border-slate-900">
+                                <p class="text-[9px] font-black uppercase opacity-50 mb-1 tracking-widest">Kalkulasi Akademik</p>
+                                <h4 class="text-4xl font-black underline decoration-blue-600 decoration-4">${pStats.ipk.toFixed(2)}</h4>
+                                <p class="text-[9px] font-black uppercase mt-4">Predikat: ${pStats.pred}</p>
+                            </div>
+                            <div class="text-center pt-10 font-black text-[10px] uppercase">
+                                <p class="mb-20 opacity-60">Dekan Fakultas Teknik</p>
+                                <p class="border-b-2 border-slate-900 pb-1">Iwan Rustendi, S.T., M.T</p>
+                                <p class="opacity-40 mt-1">NIP. 19820412 201012 1 003</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateProfileUI() {
+            document.getElementById('header-name').innerText = state.profile.name || '-';
+            document.getElementById('header-npm').innerText = state.profile.npm || '-';
+        }
+
+        // --- 6. INITIALIZE ---
+        window.onload = () => {
+            const nav = document.getElementById('sem-nav');
+            for(let i=1; i<=8; i++) {
+                nav.innerHTML += `
+                    <button onclick="setView('semester', ${i})" id="nav-sem-${i}" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 rounded-xl font-bold text-[11px] transition-all text-slate-500 hover:bg-slate-800 hover:text-white uppercase tracking-tighter">
+                        <div class="w-4 h-4 border border-slate-700 rounded flex items-center justify-center text-[8px]">S${i}</div>
+                        Semester ${i}
+                    </button>
+                `;
+            }
+            render();
+        };
+    </script>
+</body>
+</html>
