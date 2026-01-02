@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -196,15 +195,15 @@
         // --- 3. UTILS ---
         function getGrade(score) {
             const s = parseFloat(score) || 0;
-            if (s >= 85) return { letter: 'A', weight: 4.00 };
-            if (s >= 80) return { letter: 'A-', weight: 3.75 };
-            if (s >= 75) return { letter: 'B+', weight: 3.50 };
-            if (s >= 65) return { letter: 'B', weight: 3.00 };
-            if (s >= 60) return { letter: 'B-', weight: 2.75 };
-            if (s >= 55) return { letter: 'C+', weight: 2.50 };
-            if (s >= 40) return { letter: 'C', weight: 2.00 };
-            if (s >= 20) return { letter: 'D', weight: 1.00 };
-            return { letter: 'E', weight: 0.00 };
+            if (s >= 85) return { letter: 'A', weight: 4.00, label: 'Sangat Baik Sekali' };
+            if (s >= 80) return { letter: 'A-', weight: 3.75, label: 'Sangat Baik' };
+            if (s >= 75) return { letter: 'B+', weight: 3.50, label: 'Baik Sekali' };
+            if (s >= 65) return { letter: 'B', weight: 3.00, label: 'Baik' };
+            if (s >= 60) return { letter: 'B-', weight: 2.75, label: 'Cukup Baik' };
+            if (s >= 55) return { letter: 'C+', weight: 2.50, label: 'Lebih dari Cukup' };
+            if (s >= 40) return { letter: 'C', weight: 2.00, label: 'Cukup' };
+            if (s >= 20) return { letter: 'D', weight: 1.00, label: 'Kurang' };
+            return { letter: 'E', weight: 0.00, label: 'Sangat Kurang' };
         }
 
         function calculateStats(list) {
@@ -311,6 +310,7 @@
                                         <th class="px-6 py-4 text-center">SKS</th>
                                         <th class="px-6 py-4 text-center w-32">Nilai</th>
                                         <th class="px-6 py-4 text-center">Indeks</th>
+                                        <th class="px-6 py-4 text-center">Kriteria</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-100">
@@ -345,7 +345,7 @@
         }
 
         function renderTableRow(c, totalSks) {
-            const g = state.grades[c.id] || { score: '', letter: '-' };
+            const g = state.grades[c.id] || { score: '', letter: '-', label: '-' };
             let lock = false;
             let msg = '';
             
@@ -366,6 +366,7 @@
                         `<input type="number" oninput="updateGrade('${c.id}', this.value)" value="${g.score}" class="input-field w-full p-2 rounded-xl text-center text-blue-700" placeholder="0-100">`}
                     </td>
                     <td class="px-6 py-4 text-center font-black text-slate-900 text-base">${lock ? '-' : g.letter}</td>
+                    <td class="px-6 py-4 text-center font-bold text-slate-500 text-[10px] uppercase">${lock ? '-' : (g.label || '-')}</td>
                 </tr>
             `;
         }
@@ -421,12 +422,19 @@
                                     <th class="p-2 border border-slate-900 text-left">Nama Mata Kuliah</th>
                                     <th class="p-2 border border-slate-900 w-12 text-center">SKS</th>
                                     <th class="p-2 border border-slate-900 w-12 text-center">Nilai</th>
+                                    <th class="p-2 border border-slate-900 w-20 text-center">Kriteria</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 ${filtered.map((c, i) => {
-                                    const g = state.grades[c.id] || { letter: '-' };
-                                    return `<tr><td class="p-2 border border-slate-300 text-center">${i+1}</td><td class="p-2 border border-slate-300 font-bold uppercase">${c.name}</td><td class="p-2 border border-slate-300 text-center font-black">${c.sks}</td><td class="p-2 border border-slate-300 text-center font-black">${g.letter}</td></tr>`;
+                                    const g = state.grades[c.id] || { letter: '-', label: '-' };
+                                    return `<tr>
+                                        <td class="p-2 border border-slate-300 text-center">${i+1}</td>
+                                        <td class="p-2 border border-slate-300 font-bold uppercase">${c.name}</td>
+                                        <td class="p-2 border border-slate-300 text-center font-black">${c.sks}</td>
+                                        <td class="p-2 border border-slate-300 text-center font-black">${g.letter}</td>
+                                        <td class="p-2 border border-slate-300 text-center font-bold uppercase text-[9px]">${g.label || '-'}</td>
+                                    </tr>`;
                                 }).join('')}
                             </tbody>
                         </table>
